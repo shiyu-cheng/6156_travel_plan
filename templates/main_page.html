@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Plan</title>
+</head>
+<body>
+    <h1>Travel Plan</h1>
+
+    <form>
+        <div>
+            <label for="title">travel plan title</label>
+
+            <input type="text" name="title" placeholder="Enter your travel plan"></input>
+
+            <br>
+            <button type="submit">Add plan</button>
+        </div>
+    </form>
+
+
+    {% for plan in plan_list %}
+        <p> {{ plan.id }} | {{plan.travel_start_time}} | {{plan.travel_end_time}} | {{plan.travel_location}}</p>
+
+        {% if plan.plan_completed == False %}
+            <span>This plan is not complete</span>
+        {% else %}
+            <span>This plan is completed</span>
+        {% endif %}
+
+    {% endfor %}
+</body>
+</html>
