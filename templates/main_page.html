@@ -9,11 +9,20 @@
 <body>
     <h1>Travel Plan</h1>
 
-    <form>
+    <form action="/add" method="post">
         <div>
-            <label for="title">travel plan title</label>
+            <label for="travel_start_time">travel plan start date</label>
 
-            <input type="text" name="title" placeholder="Enter your travel plan"></input>
+            <input type="text" name="travel_start_time" placeholder="Enter your start date"></input>
+
+            <label for="travel_end_time">travel plan end date</label>
+
+            <input type="text" name="travel_end_time" placeholder="Enter your end date"></input>
+
+            <label for="travel_location">travel plan location</label>
+
+            <input type="text" name="travel_location" placeholder="Enter your target location"></input>
+
 
             <br>
             <button type="submit">Add plan</button>
@@ -29,6 +38,9 @@
         {% else %}
             <span>This plan is completed</span>
         {% endif %}
+
+        <a href="/update/{{ plan.id }}">Update</a>
+        <a href="/delete/{{ plan.id }}">Delete</a>
 
     {% endfor %}
 </body>
