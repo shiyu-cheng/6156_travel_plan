@@ -2,10 +2,15 @@ from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-user = 'root'
+# user = 'root'
+# password = 'dbuserdbuser'
+# port = '3306'
+# host = 'localhost'
+# db_name = '6156_travel_plan'
+user = 'admin'
 password = 'dbuserdbuser'
 port = '3306'
-host = 'localhost'
+host = 'e61561.cc790x5jaujy.us-east-1.rds.amazonaws.com'
 db_name = '6156_travel_plan'
 
 app = Flask(__name__)
