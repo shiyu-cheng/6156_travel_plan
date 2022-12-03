@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+import boto3
 from datetime import datetime
 
 # user = 'root'
@@ -30,6 +31,14 @@ class TravelPlan(db.Model):
     travel_location = db.Column(db.String(100))
     plan_completed = db.Column(db.Boolean)
 
+def publish_to_topic(action, detail):
+    sns = boto3.resource("sns", region_name='us-east-1')
+    topic = sns.Topic(arn="arn:aws:sns:us-east-1:669138289295:travel_sns")
+    message = "{\"AlarmName\":\"6156_travel_plan\",\"NewStateValue\":\"%s\",\"NewStateReason\":\"%s\"}"%(action, detail)
+    response = topic.publish(Message=message)
+    message_id = response['MessageId']
+
+
 @app.route('/')
 def main_page():
     # we want to show all travel plan on main page
@@ -39,13 +48,14 @@ def main_page():
 
 @app.route("/add", methods=["POST"])
 def add():
-    # add new travel plan 
+    # add new travel plan
     start = request.form.get("travel_start_time")
     end = request.form.get("travel_end_time")
     loc = request.form.get("travel_location")
     new_plan = TravelPlan(travel_start_time=start, travel_end_time=end, travel_location=loc, plan_completed=False)
     db.session.add(new_plan)
     db.session.commit()
+    publish_to_topic("insertion", "%s: %s to %s" %(loc, start, end))
     return redirect(url_for("main_page"))
 
 @app.route("/update/<int:plan_id>")
@@ -54,6 +64,7 @@ def update(plan_id):
     target_plan = TravelPlan.query.filter_by(id=plan_id).first()
     target_plan.plan_completed = not target_plan.plan_completed
     db.session.commit()
+    publish_to_topic("update", " %s: %s to %s" % (loc, start, end))
     return redirect(url_for("main_page"))
 
 @app.route("/delete/<int:plan_id>")
