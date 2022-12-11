@@ -64,7 +64,7 @@ def update(plan_id):
     target_plan = TravelPlan.query.filter_by(id=plan_id).first()
     target_plan.plan_completed = not target_plan.plan_completed
     db.session.commit()
-    publish_to_topic("update", " %s: %s to %s" % (loc, start, end))
+    publish_to_topic("update", " %s: %s to %s" % (target_plan.travel_location, target_plan.travel_start_time, target_plan.travel_end_time))
     return redirect(url_for("main_page"))
 
 @app.route("/delete/<int:plan_id>")
