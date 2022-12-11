@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 import boto3
+from botocore.exceptions import ClientError
+import logging
 from datetime import datetime
 
 # user = 'root'
@@ -13,6 +15,15 @@ password = 'dbuserdbuser'
 port = '3306'
 host = 'e61561.cc790x5jaujy.us-east-1.rds.amazonaws.com'
 db_name = '6156_travel_plan'
+
+AWS_REGION = 'us-east-1'
+
+# logger config
+logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s: %(levelname)s: %(message)s')
+
+sns_client = boto3.client('sns', region_name=AWS_REGION)
 
 app = Flask(__name__)
 print('mysql+pymysql://%s:%s@%s:%s/%s'%(user, password, host, port, db_name))
@@ -31,11 +42,35 @@ class TravelPlan(db.Model):
     travel_location = db.Column(db.String(100))
     plan_completed = db.Column(db.Boolean)
 
+def add_permission(topic_arn, policy_label, account_ids, action_names):
+    """
+    Adds a policy statement to a topic's access control policy.
+    """
+    try:
+
+        response = sns_client.add_permission(TopicArn=topic_arn,
+                                             Label=policy_label,
+                                             AWSAccountId=account_ids,
+                                             ActionName=action_names)
+
+    except ClientError:
+        logger.exception(f'Could not add access policy to the topic.')
+        raise
+    else:
+        return response
+
 def publish_to_topic(action, detail):
+    topic_arn = 'arn:aws:sns:us-east-1:669138289295:travel_sns'
+    policy_label = 'policy-y'
+    account_ids = ['583295611253']
+    action_names = ['Publish', 'GetTopicAttributes']
+    add_permission(topic_arn, policy_label, account_ids, action_names)
+
     sns = boto3.resource("sns", region_name='us-east-1')
-    topic = sns.Topic(arn="arn:aws:sns:us-east-1:669138289295:travel_sns")
+    topic = sns.Topic(arn=topic_arn)
     message = "{\"AlarmName\":\"6156_travel_plan\",\"NewStateValue\":\"%s\",\"NewStateReason\":\"%s\"}"%(action, detail)
     response = topic.publish(Message=message)
+
     message_id = response['MessageId']
 
 
